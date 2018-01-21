@@ -22,7 +22,6 @@ except ImportError:
     print 'To download m3u8 videos you have to'\
           ' import subprocess and install ffmpeg binary'
 
-
 base_url = sys.argv[0]
 addon_handle = int(sys.argv[1])
 args = urlparse.parse_qs(sys.argv[2][1:])
@@ -34,72 +33,67 @@ def build_url(query):
 
 def add_Channel(idChannel, nameChannel, order):
     url = build_url({'mode': 'folder', 'channel': idChannel, 'param': 'none'})
-    li = xbmcgui.ListItem(
-        nameChannel,
-        iconImage=os.path.join(globalvar.MEDIA, idChannel + ".png"))
+    li = xbmcgui.ListItem(nameChannel, iconImage=os.path.join(globalvar.MEDIA, idChannel + ".png"))
     commands = []
     if order != 0:
         commands.append((
             globalvar.LANGUAGE(30101).encode('utf-8'),
-            'XBMC.RunPlugin(%s?mode=up&channel=%s&param=none&name=none)' %
-            (sys.argv[0], order)))
+            'XBMC.RunPlugin(%s?mode=up&channel=%s&param=none&name=none)' % (sys.argv[0], order)
+        ))
     if order != len(globalvar.ordered_channels) - 1:
         commands.append((
             globalvar.LANGUAGE(30102).encode('utf-8'),
-            'XBMC.RunPlugin(%s?mode=down&channel=%s&param=none&name=none)' %
-            (sys.argv[0], order)))
+            'XBMC.RunPlugin(%s?mode=down&channel=%s&param=none&name=none)' % (sys.argv[0], order)
+        ))
     commands.append((
         globalvar.LANGUAGE(30103).encode('utf-8'),
-        'XBMC.RunPlugin(%s?mode=hide&channel=%s&param=none&name=none)' %
-        (sys.argv[0], order)))
+        'XBMC.RunPlugin(%s?mode=hide&channel=%s&param=none&name=none)' % (sys.argv[0], order)
+    ))
     if len(globalvar.hidden_channels) > 0:
         commands.append((
-            globalvar.LANGUAGE(30104).encode('utf-8') + ' (%s)' %
-            len(globalvar.hidden_channels),
-            'XBMC.RunPlugin(%s?mode=unhide&channel=%s&param=none&name=none)' %
-            (sys.argv[0], order)))
+            globalvar.LANGUAGE(30104).encode('utf-8') + ' (%s)' % len(globalvar.hidden_channels),
+            'XBMC.RunPlugin(%s?mode=unhide&channel=%s&param=none&name=none)' % (sys.argv[0], order)
+        ))
     li.addContextMenuItems(commands)
 
-    xbmcplugin.addDirectoryItem(
-        handle=addon_handle,
-        url=url,
-        listitem=li,
-        isFolder=True)
+    xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li, isFolder=True)
 
 
 def buildShowsList(videos):
     for chan, video_url, video_title, video_icon, infoLabels, video_mode in videos:
         li = xbmcgui.ListItem(
-            video_title,
-            iconImage=video_icon,
-            thumbnailImage=video_icon,
-            path=video_url)
+            video_title, iconImage=video_icon, thumbnailImage=video_icon, path=video_url
+        )
         url = build_url({
             'mode': video_mode,
             'channel': chan,
             'param': video_url,
-            'name': video_title})
+            'name': video_title
+        })
         if video_mode == 'play':
-            li.setInfo( type='Video', infoLabels=infoLabels)
+            li.setInfo(type='Video', infoLabels=infoLabels)
             li.setProperty('IsPlayable', 'true')
-            li.addContextMenuItems([(globalvar.LANGUAGE(33020).encode('utf-8'), 'XBMC.RunPlugin(%s?mode=dl&channel=%s&param=%s&name=%s)' % (sys.argv[0],chan,urllib.quote_plus(video_url),urllib.quote_plus(video_title)))])
+            li.addContextMenuItems([(
+                globalvar.LANGUAGE(33020).encode('utf-8'),
+                'XBMC.RunPlugin(%s?mode=dl&channel=%s&param=%s&name=%s)' %
+                (sys.argv[0], chan, urllib.quote_plus(video_url), urllib.quote_plus(video_title))
+            )])
             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_NONE)
             xbmcplugin.setPluginCategory(addon_handle, 'episodes')
             xbmcplugin.setContent(addon_handle, 'episodes')
         xbmcplugin.addDirectoryItem(
-            handle=addon_handle,
-            url=url,
-            listitem=li,
-            isFolder=video_mode != 'play')
+            handle=addon_handle, url=url, listitem=li, isFolder=video_mode != 'play'
+        )
     if channel == 'favourites' and param == 'unseen':
         notify(globalvar.LANGUAGE(33026).encode('utf-8'), 0)
 
 
 def notify(text, channel):
-    time = 3000  # in miliseconds
+    time = 3000    # in miliseconds
     xbmc.executebuiltin(
         'Notification(%s, %s, %d, %s)' %
-        ('FReplay', text, time, os.path.join(globalvar.ADDON_DIR, "icon.png")))
+        ('FReplay', text, time, os.path.join(globalvar.ADDON_DIR, "icon.png"))
+    )
 
 
 log.logEvent(args)
@@ -116,37 +110,55 @@ else:
     channel = args['channel'][0]
     param = args['param'][0]
     if mode[0] == 'folder':
-        for chan, folder_param, folder_title, folder_icon, mode in globalvar.channels[channel][1].list_shows(channel, param):
+        for chan, folder_param, folder_title, folder_icon, mode in globalvar.channels[channel][
+            1
+        ].list_shows(channel, param):
             url = build_url({
                 'mode': mode,
                 'channel': chan,
                 'param': folder_param,
-                'name': folder_title})
+                'name': folder_title
+            })
             li = xbmcgui.ListItem(folder_title, iconImage=folder_icon)
             # Contextual Menu
             if mode == 'shows' and channel != 'favourites':
-                li.addContextMenuItems([(globalvar.LANGUAGE(33021).encode('utf-8'), 'XBMC.RunPlugin(%s?mode=bkm&action=add&channel=%s&param=%s&display=%s)' % 
-                                          (sys.argv[0],chan, urllib.quote_plus(folder_param), urllib.quote_plus(folder_title))),
-                                          ])
+                li.addContextMenuItems([
+                    (
+                        globalvar.LANGUAGE(33021).encode('utf-8'),
+                        'XBMC.RunPlugin(%s?mode=bkm&action=add&channel=%s&param=%s&display=%s)' % (
+                            sys.argv[0], chan, urllib.quote_plus(folder_param),
+                            urllib.quote_plus(folder_title)
+                        )
+                    ),
+                ])
             if mode == 'shows' and channel == 'favourites':
-                li.addContextMenuItems([ (globalvar.LANGUAGE(33022).encode('utf-8'), 'XBMC.RunPlugin(%s?mode=bkm&action=rem&channel=%s&param=%s&display=%s)' % 
-                                        (sys.argv[0],chan,urllib.quote_plus(folder_param),urllib.quote_plus(folder_title))),
-                                        ])
+                li.addContextMenuItems([
+                    (
+                        globalvar.LANGUAGE(33022).encode('utf-8'),
+                        'XBMC.RunPlugin(%s?mode=bkm&action=rem&channel=%s&param=%s&display=%s)' % (
+                            sys.argv[0], chan, urllib.quote_plus(folder_param),
+                            urllib.quote_plus(folder_title)
+                        )
+                    ),
+                ])
 
             if mode == 'play':
                 print 'play', folder_title
                 li.setInfo(type='Video', infoLabels={"Title": folder_title})
                 li.setProperty('IsPlayable', 'true')
-                li.addContextMenuItems([(globalvar.LANGUAGE(33020).encode('utf-8'), 'XBMC.RunPlugin(%s?mode=dl&channel=%s&param=%s&name=%s)' % (sys.argv[0],chan,urllib.quote_plus(folder_param),urllib.quote_plus(folder_title)))])
+                li.addContextMenuItems([(
+                    globalvar.LANGUAGE(33020).encode('utf-8'),
+                    'XBMC.RunPlugin(%s?mode=dl&channel=%s&param=%s&name=%s)' % (
+                        sys.argv[0], chan, urllib.quote_plus(folder_param),
+                        urllib.quote_plus(folder_title)
+                    )
+                )])
             xbmcplugin.addDirectoryItem(
-                handle=addon_handle,
-                url=url,
-                listitem=li,
-                isFolder=mode != 'play')
+                handle=addon_handle, url=url, listitem=li, isFolder=mode != 'play'
+            )
 
     elif mode[0] == 'shows':
-        buildShowsList(
-            globalvar.channels[channel][1].list_videos(channel, param))
+        buildShowsList(globalvar.channels[channel][1].list_videos(channel, param))
 
     elif mode[0] == 'play':
         url = globalvar.channels[channel][1].getVideoURL(channel, param)
@@ -161,12 +173,10 @@ else:
         keyboard = xbmc.Keyboard('', globalvar.LANGUAGE(33023).encode('utf-8'))
         keyboard.doModal()
         if (keyboard.isConfirmed()):
-            buildShowsList(
-                globalvar.channels[channel][1].list_videos(
-                    channel, keyboard.getText()))
+            buildShowsList(globalvar.channels[channel][1].list_videos(channel, keyboard.getText()))
 
     elif mode[0] == 'bkm':
-        if args['action'][0] == 'add':  # Add to Favourites
+        if args['action'][0] == 'add':    # Add to Favourites
             display = args['display'][0]
             result = favourites.add_favourite(channel, param, display)
         else:
@@ -184,8 +194,7 @@ else:
             extension = url[extensionStart:len(url)].upper()
             if extension == '.MP4':
                 fileName = utils.format_filename(args['name'][0] + '.mp4')
-                commondownloader.download(
-                    url, os.path.join(globalvar.dlfolder, fileName))
+                commondownloader.download(url, os.path.join(globalvar.dlfolder, fileName))
 
             elif extension == '.M3U8' or extension == '.M3U':
                 try:
@@ -199,9 +208,7 @@ else:
                     cmd = 'ffmpeg -i "' + url + '"'\
                           ' -c copy ' + file_path
 
-                    notify(
-                        'Téléchargement démarré',
-                        channel)
+                    notify('Téléchargement démarré', channel)
                     p = subprocess.Popen(
                         cmd,
                         stdout=subprocess.PIPE,
@@ -210,22 +217,18 @@ else:
                         shell=True
                     )
                     p.wait()
-                    notify(
-                        'Téléchargement terminé',
-                        channel)
+                    notify('Téléchargement terminé', channel)
                     (output, err) = p.communicate()
                     print "Output subprocess : " + output
                     print "Error subprocess : " + err
                 except:
                     notify(
                         'To download m3u8 videos you have to'
-                        ' import subprocess and install ffmpeg binary',
-                        channel)
+                        ' import subprocess and install ffmpeg binary', channel
+                    )
 
             else:
-                notify(
-                    extension + globalvar.LANGUAGE(33025).encode('utf-8'),
-                    channel)
+                notify(extension + globalvar.LANGUAGE(33025).encode('utf-8'), channel)
 
     elif mode[0] == 'up':
         utils.move_up(int(channel))
@@ -238,13 +241,8 @@ else:
         xbmc.executebuiltin("XBMC.Container.Refresh")
     elif mode[0] == 'unhide':
         dialog = xbmcgui.Dialog()
-        ret = dialog.select(
-            globalvar.LANGUAGE(30104).encode('utf-8'),
-            globalvar.hidden_channels)
+        ret = dialog.select(globalvar.LANGUAGE(30104).encode('utf-8'), globalvar.hidden_channels)
         if ret >= 0:
             utils.unhide(ret)
             xbmc.executebuiltin("XBMC.Container.Refresh")
-    xbmcplugin.endOfDirectory(
-        handle=int(addon_handle),
-        succeeded=True,
-        updateListing=False)
+    xbmcplugin.endOfDirectory(handle=int(addon_handle), succeeded=True, updateListing=False)

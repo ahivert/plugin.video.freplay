@@ -25,11 +25,7 @@ def list_shows(channel, folder):
     shows = []
 
     if folder == 'none':
-        filePath = utils.downloadCatalog(
-            urlShow % (get_token()),
-            'cplus.json',
-            False,
-            {})
+        filePath = utils.downloadCatalog(urlShow % (get_token()), 'cplus.json', False, {})
         filPrgm = open(filePath).read()
         jsoncat = json.loads(filPrgm)
         strates = jsoncat['strates']
@@ -37,18 +33,13 @@ def list_shows(channel, folder):
             if strate['type'] == 'links':
                 for content in strate['contents']:
                     shows.append([
-                        channel,
-                        content['onClick']['URLPage'].encode('utf-8'),
+                        channel, content['onClick']['URLPage'].encode('utf-8'),
                         content['onClick']['displayName'].encode('utf-8'),
-                        content['URLImage'].encode('utf-8'),
-                        'folder'])
+                        content['URLImage'].encode('utf-8'), 'folder'
+                    ])
     else:
         fileName = folder[folder.find('.json') - 4:folder.find('.json') + 5]
-        filePath = utils.downloadCatalog(
-            folder,
-            fileName,
-            False,
-            {})
+        filePath = utils.downloadCatalog(folder, fileName, False, {})
         filPrgm = open(filePath).read()
         jsoncat = json.loads(filPrgm)
         strates = jsoncat['strates']
@@ -58,11 +49,8 @@ def list_shows(channel, folder):
                     url = content['onClick']['URLPage']
                     url = url.replace(get_token(), '$$TOKEN$$').encode('utf-8')
                     shows.append([
-                        channel,
-                        url,
-                        content['title'].encode('utf-8'),
-                        content['URLImage'],
-                        'shows'])
+                        channel, url, content['title'].encode('utf-8'), content['URLImage'], 'shows'
+                    ])
 
     return shows
 
@@ -112,11 +100,8 @@ def list_videos(channel, show_URL):
             if 'subtitle' in content:
                 plot = content['subtitle'].encode('utf-8')
             icon = content['URLImage'].encode('utf-8')
-            infoLabels = {
-                "Title": title,
-                "Plot": plot}
+            infoLabels = {"Title": title, "Plot": plot}
 
             videos.append([channel, url, title, icon, infoLabels, 'play'])
 
     return videos
-

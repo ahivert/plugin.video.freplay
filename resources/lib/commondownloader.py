@@ -39,7 +39,7 @@ def getResponse(url, size, referer, agent, cookie):
 
         if size > 0:
             size = int(size)
-            req.add_header('Range',   'bytes=%d-' % size)
+            req.add_header('Range', 'bytes=%d-' % size)
 
         resp = urllib2.urlopen(req, timeout=10)
         return resp
@@ -49,39 +49,41 @@ def getResponse(url, size, referer, agent, cookie):
 
 def download(url, dest, title=None, referer=None, agent=None, cookie=None):
     if not title:
-        title  = 'Kodi Download'
+        title = 'Kodi Download'
 
     if not referer:
-        referer  = ''
+        referer = ''
 
     if not agent:
-        agent  = ''
+        agent = ''
 
     if not cookie:
-        cookie  = ''
+        cookie = ''
 
     #quote parameters
-    url     = urllib.quote_plus(url)
-    dest    = urllib.quote_plus(dest)
-    title   = urllib.quote_plus(title)
+    url = urllib.quote_plus(url)
+    dest = urllib.quote_plus(dest)
+    title = urllib.quote_plus(title)
     referer = urllib.quote_plus(referer)
-    agent   = urllib.quote_plus(agent)
-    cookie  = urllib.quote_plus(cookie)
+    agent = urllib.quote_plus(agent)
+    cookie = urllib.quote_plus(cookie)
 
     script = inspect.getfile(inspect.currentframe())
-    cmd    = 'RunScript(%s, %s, %s, %s, %s, %s, %s)' % (script, url, dest, title, referer, agent, cookie)
+    cmd = 'RunScript(%s, %s, %s, %s, %s, %s, %s)' % (
+        script, url, dest, title, referer, agent, cookie
+    )
 
     xbmc.executebuiltin(cmd)
 
 
 def doDownload(url, dest, title, referer, agent, cookie):
     #unquote parameters
-    url     = urllib.unquote_plus(url)
-    dest    = urllib.unquote_plus(dest)
-    title   = urllib.unquote_plus(title)
+    url = urllib.unquote_plus(url)
+    dest = urllib.unquote_plus(dest)
+    title = urllib.unquote_plus(title)
     referer = urllib.unquote_plus(referer)
-    agent   = urllib.unquote_plus(agent)
-    cookie  = urllib.unquote_plus(cookie)
+    agent = urllib.unquote_plus(agent)
+    cookie = urllib.unquote_plus(cookie)
 
     file = dest.rsplit(os.sep, 1)[-1]
 
@@ -91,11 +93,15 @@ def doDownload(url, dest, title, referer, agent, cookie):
         xbmcgui.Dialog().ok(title, dest, 'Download failed', 'No response from server')
         return
 
-    try:    content = int(resp.headers['Content-Length'])
-    except: content = 0
+    try:
+        content = int(resp.headers['Content-Length'])
+    except:
+        content = 0
 
-    try:    resumable = 'bytes' in resp.headers['Accept-Ranges'].lower()
-    except: resumable = False
+    try:
+        resumable = 'bytes' in resp.headers['Accept-Ranges'].lower()
+    except:
+        resumable = False
 
     #print "Download Header"
     #print resp.headers
@@ -107,19 +113,22 @@ def doDownload(url, dest, title, referer, agent, cookie):
         return
 
     size = 1024 * 1024
-    mb   = content / (1024 * 1024)
+    mb = content / (1024 * 1024)
 
     if content < size:
         size = content
 
-    total   = 0
-    notify  = 0
-    errors  = 0
-    count   = 0
-    resume  = 0
-    sleep   = 0
+    total = 0
+    notify = 0
+    errors = 0
+    count = 0
+    resume = 0
+    sleep = 0
 
-    if xbmcgui.Dialog().yesno(title + ' - Confirm Download', file, 'Complete file is %dMB' % mb, 'Continue with download?', 'Confirm',  'Cancel') == 1:
+    if xbmcgui.Dialog().yesno(
+        title + ' - Confirm Download', file, 'Complete file is %dMB' % mb,
+        'Continue with download?', 'Confirm', 'Cancel'
+    ) == 1:
         return
 
     print 'Download File Size : %dMB %s ' % (mb, dest)
@@ -127,7 +136,7 @@ def doDownload(url, dest, title, referer, agent, cookie):
     #f = open(dest, mode='wb')
     f = xbmcvfs.File(dest, 'w')
 
-    chunk  = None
+    chunk = None
     chunks = []
 
     while True:
@@ -136,17 +145,22 @@ def doDownload(url, dest, title, referer, agent, cookie):
             downloaded += len(c)
         percent = min(100 * downloaded / content, 100)
         if percent >= notify:
-            xbmc.executebuiltin( "XBMC.Notification(%s,%s,%i)" % ( title + ' - Download Progress - ' + str(percent)+'%', dest, 10000))
+            xbmc.executebuiltin(
+                "XBMC.Notification(%s,%s,%i)" %
+                (title + ' - Download Progress - ' + str(percent) + '%', dest, 10000)
+            )
 
-            print 'Download percent : %s %s %dMB downloaded : %sMB File Size : %sMB' % (str(percent)+'%', dest, mb, downloaded / 1000000, content / 1000000)
+            print 'Download percent : %s %s %dMB downloaded : %sMB File Size : %sMB' % (
+                str(percent) + '%', dest, mb, downloaded / 1000000, content / 1000000
+            )
 
             notify += 10
 
         chunk = None
         error = False
 
-        try:        
-            chunk  = resp.read(size)
+        try:
+            chunk = resp.read(size)
             if not chunk:
                 if percent < 99:
                     error = True
@@ -159,7 +173,7 @@ def doDownload(url, dest, title, referer, agent, cookie):
                     f.close()
                     print '%s download complete' % (dest)
                     if not xbmc.Player().isPlaying():
-                        xbmcgui.Dialog().ok(title, dest, '' , 'Download finished')
+                        xbmcgui.Dialog().ok(title, dest, '', 'Download finished')
                     return
         except Exception, e:
             print str(e)
@@ -170,16 +184,16 @@ def doDownload(url, dest, title, referer, agent, cookie):
             if hasattr(e, 'errno'):
                 errno = e.errno
 
-            if errno == 10035: # 'A non-blocking socket operation could not be completed immediately'
+            if errno == 10035:    # 'A non-blocking socket operation could not be completed immediately'
                 pass
 
-            if errno == 10054: #'An existing connection was forcibly closed by the remote host'
-                errors = 10 #force resume
-                sleep  = 30
+            if errno == 10054:    #'An existing connection was forcibly closed by the remote host'
+                errors = 10    #force resume
+                sleep = 30
 
-            if errno == 11001: # 'getaddrinfo failed'
-                errors = 10 #force resume
-                sleep  = 30
+            if errno == 11001:    # 'getaddrinfo failed'
+                errors = 10    #force resume
+                sleep = 30
 
         if chunk:
             errors = 0
@@ -192,21 +206,21 @@ def doDownload(url, dest, title, referer, agent, cookie):
 
         if error:
             errors += 1
-            count  += 1
+            count += 1
             print '%d Error(s) whilst downloading %s' % (count, dest)
-            xbmc.sleep(sleep*1000)
+            xbmc.sleep(sleep * 1000)
 
         if (resumable and errors > 0) or errors >= 10:
             if (not resumable and resume >= 10) or resume >= 100:
                 #Give up!
                 print '%s download canceled - too many error whilst downloading' % (dest)
-                xbmcgui.Dialog().ok(title, dest, '' , 'Download failed')
+                xbmcgui.Dialog().ok(title, dest, '', 'Download failed')
                 return
 
             resume += 1
-            errors  = 0
+            errors = 0
             if resumable:
-                chunks  = []
+                chunks = []
                 #create new response
                 print 'Download resumed (%d) %s' % (resume, dest)
                 resp = getResponse(url, total, referer, agent, cookie)

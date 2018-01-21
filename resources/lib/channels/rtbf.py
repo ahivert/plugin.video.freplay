@@ -26,26 +26,35 @@ categories = {
 
 
 def list_shows(channel, param):
-  shows = []
-  if param == 'none':
-    for url, title in categories.iteritems():
-      shows.append([channel,url,title,'','shows'])
-  return shows
-    
-def list_videos(channel, cat_url):  
-  videos = []
-  cat=cat_url[2:]  
-  filePath=utils.downloadCatalog(url_root + cat_url ,'rtbf' + cat + '.html',False,{})
-  html=open(filePath).read().replace('\xe9', 'e').replace('\xe0', 'a').replace('\n', ' ').replace('\r', '')
-  match = re.compile(r'<h3 class="rtbf-media-item__title "><a href="(.*?)" title="(.*?)">',re.DOTALL).findall(html)
-  for url,title in match:
-    title=utils.formatName(title)   
-    infoLabels={ "Title": title}
-    videos.append( [channel, url , title , '',infoLabels,'play'] )
+    shows = []
+    if param == 'none':
+        for url, title in categories.iteritems():
+            shows.append([channel, url, title, '', 'shows'])
+    return shows
 
-  return videos
+
+def list_videos(channel, cat_url):
+    videos = []
+    cat = cat_url[2:]
+    filePath = utils.downloadCatalog(url_root + cat_url, 'rtbf' + cat + '.html', False, {})
+    html = open(filePath).read().replace('\xe9', 'e').replace('\xe0',
+                                                              'a').replace('\n',
+                                                                           ' ').replace('\r', '')
+    match = re.compile(
+        r'<h3 class="rtbf-media-item__title "><a href="(.*?)" title="(.*?)">', re.DOTALL
+    ).findall(html)
+    for url, title in match:
+        title = utils.formatName(title)
+        infoLabels = {"Title": title}
+        videos.append([channel, url, title, '', infoLabels, 'play'])
+
+    return videos
+
 
 def getVideoURL(channel, url_video):
-    html = utils.get_webcontent(url_video).replace('\xe9', 'e').replace('\xe0', 'a').replace('\n', ' ').replace('\r', '')
-    url=re.findall(r'<meta property="og:video" content="(.*?).mp4"', html)[0]
-    return url+'.mp4'
+    html = utils.get_webcontent(url_video).replace('\xe9',
+                                                   'e').replace('\xe0',
+                                                                'a').replace('\n',
+                                                                             ' ').replace('\r', '')
+    url = re.findall(r'<meta property="og:video" content="(.*?).mp4"', html)[0]
+    return url + '.mp4'

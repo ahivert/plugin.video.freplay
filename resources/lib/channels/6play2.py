@@ -7,8 +7,10 @@ from resources.lib import globalvar
 from resources.lib import log
 import json
 
-title = ['M6', 'W9', '6ter','Stories','Bruce','Crazy Kitchen','Home Time','Sixiem Style','Comic']
-img = ['m6', 'w9', '6ter','stories','bruce','crazy_kitchen','home','styles','comedy']
+title = [
+    'M6', 'W9', '6ter', 'Stories', 'Bruce', 'Crazy Kitchen', 'Home Time', 'Sixiem Style', 'Comic'
+]
+img = ['m6', 'w9', '6ter', 'stories', 'bruce', 'crazy_kitchen', 'home', 'styles', 'comedy']
 readyForUse = True
 
 # Pour connaitre les catégories de la chaine
@@ -31,7 +33,6 @@ urlSubcategory = 'http://pc.middleware.6play.fr/6play/v2/platforms/' \
                  'm6group_web/services/6play/programs/%s' \
                  '?with=links,subcats,rights'
 
-
 # Pour connaitre les videos de ce dossier
 # (Episode 1, Episode 2, ...)
 urlVideos = 'http://pc.middleware.6play.fr/6play/v2/platforms/' \
@@ -48,7 +49,6 @@ urlJsonVideo = 'https://pc.middleware.6play.fr/6play/v2/platforms/' \
                'm6group_web/services/6play/videos/%s'\
                '?csa=6&with=clips,freemiumpacks'
 
-
 urlImg = 'https://images.6play.fr/v1/images/%s/raw'
 
 
@@ -56,12 +56,12 @@ def list_shows(channel, folder):
     shows = []
 
     if folder == 'none':
-        if channel in ('stories','bruce','crazy_kitchen','home','styles','comedy'):
-          url=urlRoot % (channel)
+        if channel in ('stories', 'bruce', 'crazy_kitchen', 'home', 'styles', 'comedy'):
+            url = urlRoot % (channel)
         else:
-          url=urlRoot % (channel + 'replay')
-        filePath = utils.download_catalog(url,'%s.json' % (channel),False,random_ua=True)
-        
+            url = urlRoot % (channel + 'replay')
+        filePath = utils.download_catalog(url, '%s.json' % (channel), False, random_ua=True)
+
         filPrgm = open(filePath).read()
         jsonParser = json.loads(filPrgm)
 
@@ -77,18 +77,11 @@ def list_shows(channel, folder):
             categoryId = str(array['id'])
             categoryName = array['name'].encode('utf-8')
 
-            shows.append([
-                channel,
-                'category|' + categoryId,
-                categoryName,
-                '',
-                'folder'])
+            shows.append([channel, 'category|' + categoryId, categoryName, '', 'folder'])
 
     elif 'category' in folder:
         category = folder.split('|')[1]
-        req = urllib2.Request(
-            urlCategory % (category),
-            headers=utils.get_random_ua_hdr())
+        req = urllib2.Request(urlCategory % (category), headers=utils.get_random_ua_hdr())
         filPrgm = urllib2.urlopen(req).read()
         jsonParser = json.loads(filPrgm)
 
@@ -104,18 +97,14 @@ def list_shows(channel, folder):
                     programImg = urlImg % (external_key)
 
             shows.append([
-                channel,
-                'subCategory|' + programId + '|' + programImg,
-                programTitle,
-                programImg,
-                'folder'])
+                channel, 'subCategory|' + programId + '|' + programImg, programTitle, programImg,
+                'folder'
+            ])
 
     elif 'subCategory' in folder:
         programId = folder.split('|')[1]
         programImg = folder.split('|')[2]
-        req = urllib2.Request(
-            urlSubcategory % (programId),
-            headers=utils.get_random_ua_hdr())
+        req = urllib2.Request(urlSubcategory % (programId), headers=utils.get_random_ua_hdr())
         programJson = urllib2.urlopen(req).read()
 
         jsonParser = json.loads(programJson)
@@ -124,18 +113,10 @@ def list_shows(channel, folder):
             subCategoryTitle = subCategory['title'].encode('utf-8')
 
             shows.append([
-                channel,
-                programId + '|' + subCategoryId,
-                subCategoryTitle,
-                programImg,
-                'shows'])
+                channel, programId + '|' + subCategoryId, subCategoryTitle, programImg, 'shows'
+            ])
 
-        shows.append([
-                channel,
-                programId + '|' + 'null',
-                'Toutes les vidéos',
-                programImg,
-                'shows'])
+        shows.append([channel, programId + '|' + 'null', 'Toutes les vidéos', programImg, 'shows'])
 
     return shows
 
@@ -149,9 +130,7 @@ def list_videos(channel, id):
         url = urlVideos2 % programId
     else:
         url = urlVideos % (programId, subCategoryId)
-    req = urllib2.Request(
-        url,
-        headers=utils.get_random_ua_hdr())
+    req = urllib2.Request(url, headers=utils.get_random_ua_hdr())
     programJson = urllib2.urlopen(req).read()
     jsonParser = json.loads(programJson)
 
@@ -159,7 +138,7 @@ def list_videos(channel, id):
         videoId = str(video['id'])
 
         title = video['title'].encode('utf-8')
-        duration = video['clips'][0]['duration']/60
+        duration = video['clips'][0]['duration'] / 60
         description = video['description'].encode('utf-8')
         try:
             dateDiffusion = video['clips'][0]['product']['last_diffusion']
@@ -175,36 +154,28 @@ def list_videos(channel, id):
         programImgs = video['clips'][0]['images']
         programImg = ''
         for img in programImgs:
-                if img['role'].encode('utf-8') == 'vignette':
-                    external_key = img['external_key'].encode('utf-8')
-                    programImg = urlImg % (external_key)
+            if img['role'].encode('utf-8') == 'vignette':
+                external_key = img['external_key'].encode('utf-8')
+                programImg = urlImg % (external_key)
 
         infoLabels = {
             "Title": title,
             "Plot": description,
             'Duration': duration,
             "Aired": dateDiffusion,
-            "Year": year}
+            "Year": year
+        }
 
-        videos.append([
-            channel,
-            videoId,
-            title,
-            programImg,
-            infoLabels,
-            'play'])
+        videos.append([channel, videoId, title, programImg, infoLabels, 'play'])
 
     return videos
 
 
 def getVideoURL(channel, media_id):
-    req = urllib2.Request(
-        urlJsonVideo % (media_id),
-        headers=utils.get_random_ua_hdr())
+    req = urllib2.Request(urlJsonVideo % (media_id), headers=utils.get_random_ua_hdr())
     videoJson = urllib2.urlopen(req).read()
     jsonParser = json.loads(videoJson)
 
-    
     videoAssets = jsonParser['clips'][0]['assets']
     url = ''
     url2 = ''
@@ -230,17 +201,15 @@ def getVideoURL(channel, media_id):
     else:
         manifest_url = url3
 
-    req = urllib2.Request(
-        manifest_url,
-        headers=utils.get_random_ua_hdr())
+    req = urllib2.Request(manifest_url, headers=utils.get_random_ua_hdr())
     manifest = urllib2.urlopen(req).read()
     if 'drm' in manifest:
         msg = 'Vidéo protégée par DRM'
         log.logError(msg, msg)
         #log.logError(manifest, manifest)
         #log.logError(manifest_url, manifest_url)
-    	#log.logEvent(videoJson)
-        
+        #log.logEvent(videoJson)
+
         return ''
 
     if globalvar.ADDON.getSetting('6playQuality') == 'Auto':

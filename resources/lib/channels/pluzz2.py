@@ -15,29 +15,31 @@ showInfo = 'http://webservices.francetelevisions.fr/tools/getInfosOeuvre/v2/' \
 
 imgURL = 'http://refonte.webservices.francetelevisions.fr%s'
 
-categories = {"france2": "France 2",
-              "france3": "France 3",
-              "france4": "France 4",
-              "france5": "France 5",
-              "franceo": "France Ô",
-              "guadeloupe": "Guadeloupe 1ère",
-              "guyane": "Guyane 1ère",
-              "martinique": "Martinique 1ère",
-              "mayotte": "Mayotte 1ère",
-              "nouvellecaledonie": "Nouvelle Calédonie 1ère",
-              "polynesie": "Polynésie 1ère",
-              "reunion": "Réunion 1ère",
-              "saintpierreetmiquelon": "St-Pierre et Miquelon 1ère",
-              "wallisetfutuna": "Wallis et Futuna 1ère",
-              "sport": "Sport",
-              "info": "Info",
-              "documentaire": "Documentaire",
-              "seriefiction": "Série & fiction",
-              "magazine": "Magazine",
-              "jeunesse": "Jeunesse",
-              "divertissement": "Divertissement",
-              "jeu": "Jeu",
-              "culture": "Culture"}
+categories = {
+    "france2": "France 2",
+    "france3": "France 3",
+    "france4": "France 4",
+    "france5": "France 5",
+    "franceo": "France Ô",
+    "guadeloupe": "Guadeloupe 1ère",
+    "guyane": "Guyane 1ère",
+    "martinique": "Martinique 1ère",
+    "mayotte": "Mayotte 1ère",
+    "nouvellecaledonie": "Nouvelle Calédonie 1ère",
+    "polynesie": "Polynésie 1ère",
+    "reunion": "Réunion 1ère",
+    "saintpierreetmiquelon": "St-Pierre et Miquelon 1ère",
+    "wallisetfutuna": "Wallis et Futuna 1ère",
+    "sport": "Sport",
+    "info": "Info",
+    "documentaire": "Documentaire",
+    "seriefiction": "Série & fiction",
+    "magazine": "Magazine",
+    "jeunesse": "Jeunesse",
+    "divertissement": "Divertissement",
+    "jeu": "Jeu",
+    "culture": "Culture"
+}
 
 
 def list_shows(channel, folder):
@@ -57,10 +59,7 @@ def list_shows(channel, folder):
                       'la_1ere_saintpierreetmiquelon'
 
     url_json = channelCatalog % (realChannel)
-    filePath = utils.downloadCatalog(url_json,
-                                     '%s.json' % (channel),
-                                     False,
-                                     {})
+    filePath = utils.downloadCatalog(url_json, '%s.json' % (channel), False, {})
     filPrgm = open(filePath).read()
     jsonParser = json.loads(filPrgm)
     emissions = jsonParser['reponse']['emissions']
@@ -70,12 +69,7 @@ def list_shows(channel, folder):
             rubrique = emission['rubrique'].encode('utf-8')
             if rubrique not in uniqueItem:
                 uniqueItem[rubrique] = rubrique
-                shows.append([
-                    channel,
-                    rubrique,
-                    change_to_nicer_name(rubrique),
-                    '',
-                    'folder'])
+                shows.append([channel, rubrique, change_to_nicer_name(rubrique), '', 'folder'])
 
     else:
         for emission in emissions:
@@ -89,11 +83,8 @@ def list_shows(channel, folder):
                     if id not in uniqueItem:
                         uniqueItem[id] = id
                         shows.append([
-                            channel,
-                            id,
-                            titre,
-                            imgURL % (emission['image_large']),
-                            'shows'])
+                            channel, id, titre, imgURL % (emission['image_large']), 'shows'
+                        ])
     return shows
 
 
@@ -105,11 +96,7 @@ def change_to_nicer_name(original_name):
 
 def list_videos(channel, folder):
     videos = []
-    filePath = utils.downloadCatalog(
-        channelCatalog % (channel),
-        '%s.json' % (channel),
-        False,
-        {})
+    filePath = utils.downloadCatalog(channelCatalog % (channel), '%s.json' % (channel), False, {})
     filPrgm = open(filePath).read()
     jsonParser = json.loads(filPrgm)
     emissions = jsonParser['reponse']['emissions']
@@ -132,32 +119,21 @@ def list_videos(channel, folder):
             if 'soustitre' in emission:
                 titre += ' - ' + emission['soustitre'].encode('utf-8')
             if 'date_diffusion' in emission:
-                year = emission['date_diffusion'][:4]            
+                year = emission['date_diffusion'][:4]
                 titre += ' - ' + emission['date_diffusion'][:10].encode('utf-8')
             if 'image_medium' in emission:
-                image = imgURL % emission['image_medium']                              
-            
-            infoLabels = {
-                "Title": titre,
-                "Plot": plot,
-                "Duration": duration,
-                "Year": year}
+                image = imgURL % emission['image_medium']
 
-            videos.append([
-                channel,
-                id_diffusion,
-                titre,
-                image,
-                infoLabels,
-                'play'])
+            infoLabels = {"Title": titre, "Plot": plot, "Duration": duration, "Year": year}
+
+            videos.append([channel, id_diffusion, titre, image, infoLabels, 'play'])
     return videos
 
 
 def getVideoURL(channel, id):
-        filPrgm = utils.get_webcontent(showInfo % (id))
-        jsonParser = json.loads(filPrgm)
-        for video in jsonParser['videos']:
-            if video['format'] == globalvar.ADDON.getSetting(
-               '%sQuality' % (channel)):
-                url = video['url']
-        return url
+    filPrgm = utils.get_webcontent(showInfo % (id))
+    jsonParser = json.loads(filPrgm)
+    for video in jsonParser['videos']:
+        if video['format'] == globalvar.ADDON.getSetting('%sQuality' % (channel)):
+            url = video['url']
+    return url

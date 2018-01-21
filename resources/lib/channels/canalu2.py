@@ -14,18 +14,12 @@ def list_shows(channel, param):
     shows = []
 
     if param == 'none':
-        filePath = utils.download_catalog(
-            url_root + '/themes',
-            channel + '.html')
+        filePath = utils.download_catalog(url_root + '/themes', channel + '.html')
         root_html = open(filePath).read()
         root_soup = bs(root_html, "html.parser")
 
-        themes_soup = root_soup.find(
-            'div',
-            attrs={'class': 'fright'})
-        themes_soup = themes_soup.find(
-            'ul',
-            attrs={'id': 'themes'})
+        themes_soup = root_soup.find('div', attrs={'class': 'fright'})
+        themes_soup = themes_soup.find('ul', attrs={'id': 'themes'})
 
         for theme in themes_soup.findAll('li'):
             name_theme = theme.find('a')['title'].encode('utf-8')
@@ -34,23 +28,16 @@ def list_shows(channel, param):
             depth = url_theme.count('/')
 
             shows.append([
-                channel,
-                url_theme + '|' + str(depth),
-                name_theme,
-                url_root + img_theme,
-                'folder'])
+                channel, url_theme + '|' + str(depth), name_theme, url_root + img_theme, 'folder'
+            ])
     else:
         current_url = param.split('|')[0]
         current_url_depth = int(param.split('|')[1])
-        file_path = utils.download_catalog(
-            current_url,
-            current_url + '.html')
+        file_path = utils.download_catalog(current_url, current_url + '.html')
         theme_html = open(file_path).read()
         theme_soup = bs(theme_html, "html.parser")
 
-        categories = theme_soup.find(
-            'ul',
-            attrs={'id': 'racine'})
+        categories = theme_soup.find('ul', attrs={'id': 'racine'})
 
         categories = categories.find_all('a')
 
@@ -64,19 +51,11 @@ def list_shows(channel, param):
                     if category.find('span')['class'] == 'file':
                         next_type = 'shows'
 
-                    shows.append([
-                        channel,
-                        url + '|' + str(url_depth),
-                        title,
-                        '',
-                        next_type])
+                    shows.append([channel, url + '|' + str(url_depth), title, '', next_type])
 
         shows.append([
-            channel,
-            current_url + '|none',
-            'Dernières vidéos de cette cétégorie',
-            '',
-            'shows'])
+            channel, current_url + '|none', 'Dernières vidéos de cette cétégorie', '', 'shows'
+        ])
 
     return shows
 
@@ -85,19 +64,13 @@ def list_videos(channel, param):
     videos = []
     url = param.split('|')[0]
     # print 'URL : ' + url
-    file_path = utils.download_catalog(
-        url,
-        url + '.html')
+    file_path = utils.download_catalog(url, url + '.html')
     theme_html = open(file_path).read()
     theme_soup = bs(theme_html, "html.parser")
 
-    videos_soup = theme_soup.find_all(
-        'li',
-        class_='fleft lasts-online-even')
+    videos_soup = theme_soup.find_all('li', class_='fleft lasts-online-even')
 
-    videos2_soup = theme_soup.find_all(
-        'li',
-        class_='fleft lasts-online-odd')
+    videos2_soup = theme_soup.find_all('li', class_='fleft lasts-online-odd')
 
     for video in videos_soup:
 
@@ -109,17 +82,9 @@ def list_videos(channel, param):
         title = title.replace('\n', '').replace('\r', '')
         duration = 0
 
-        infoLabels = {
-            "Title": title,
-            'Duration': duration}
+        infoLabels = {"Title": title, 'Duration': duration}
 
-        videos.append([
-            channel,
-            url,
-            title,
-            img,
-            infoLabels,
-            'play'])
+        videos.append([channel, url, title, img, infoLabels, 'play'])
 
     for video in videos2_soup:
 
@@ -131,21 +96,11 @@ def list_videos(channel, param):
         title = title.replace('\n', '').replace('\r', '')
         duration = 0
 
-        infoLabels = {
-            "Title": title,
-            'Duration': duration}
+        infoLabels = {"Title": title, 'Duration': duration}
 
-        videos.append([
-            channel,
-            url,
-            title,
-            img,
-            infoLabels,
-            'play'])
+        videos.append([channel, url, title, img, infoLabels, 'play'])
 
-    page_soup = theme_soup.find(
-        'div',
-        class_='pagination')
+    page_soup = theme_soup.find('div', class_='pagination')
     if page_soup is not None:
         page_soup = page_soup.find_all('a')
 
@@ -159,22 +114,21 @@ def list_videos(channel, param):
         if current_page < len(page_soup):
             next_url = page_soup[current_page]['href'].encode('utf-8')
             videos.append([
-                channel,
-                next_url,
-                'Page suivante (page ' + str(current_page + 1) + ')',
-                '',
-                {},
-                'shows'])
+                channel, next_url, 'Page suivante (page ' + str(current_page + 1) + ')', '', {},
+                'shows'
+            ])
 
     return videos
 
 
 def getVideoURL(channel, url):
-    html = utils.get_webcontent(url).replace('\xe9', 'e').replace('\xe0', 'a').replace('\n', ' ').replace('\r', '')
-    
+    html = utils.get_webcontent(url).replace('\xe9',
+                                             'e').replace('\xe0',
+                                                          'a').replace('\n', ' ').replace('\r', '')
+
     urls = re.compile(r'"file": "(.*?)"', re.DOTALL).findall(html)
     for url in urls:
-      if '.hd.mp4' in url:
-        url_video=url
-        
+        if '.hd.mp4' in url:
+            url_video = url
+
     return url_video

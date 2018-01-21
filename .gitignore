@@ -30,3 +30,6 @@ Temporary Items
 
 # Idea folder
 .idea
+
+# virtualenv
+venv

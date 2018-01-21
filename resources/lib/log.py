@@ -15,9 +15,10 @@ def debugInfo():
         print 'Internet' + xbmc.getInfoLabel("System.InternetState")
 
     if globalvar.LOGLEVEL <= 2:
-        print ('Addon=' +
-               globalvar.ADDON.getAddonInfo('name') +
-               ' ' + globalvar.ADDON.getAddonInfo('version'))
+        print(
+            'Addon=' + globalvar.ADDON.getAddonInfo('name') + ' ' +
+            globalvar.ADDON.getAddonInfo('version')
+        )
         print 'Addon Path=' + globalvar.ADDON.getAddonInfo('path')
 
 
@@ -29,11 +30,9 @@ def logDLFile(url):
 def logError(args, error):
     debugInfo()
     xbmc.executebuiltin(
-        'Notification(%s, %s, %d, %s)' % (
-            'FReplay',
-            str(error),
-            3000,
-            os.path.join(globalvar.ADDON_DIR, "icon.png")))
+        'Notification(%s, %s, %d, %s)' %
+        ('FReplay', str(error), 3000, os.path.join(globalvar.ADDON_DIR, "icon.png"))
+    )
     print '-----------Error' + str(args) + str(error)
 
 
@@ -49,18 +48,21 @@ def logGA(channel, param, programName):
     tid = 'UA-62709903-1'
     build = xbmc.getInfoLabel("System.BuildVersion")
     build = 'Kodi ' + build[:build.find(' ')]
-    values = {'v': '1',
-              'tid': tid,
-              'cid': cid,
-              't': 'pageview',
-              'dl': 'c=%s&p=%s' % (channel, param),
-              'dt': programName[:50],
-              'ua': build,
-              'dr': (globalvar.ADDON.getAddonInfo('name') + '-' + globalvar.ADDON.getAddonInfo('version'))}
+    values = {
+        'v': '1',
+        'tid': tid,
+        'cid': cid,
+        't': 'pageview',
+        'dl': 'c=%s&p=%s' % (channel, param),
+        'dt': programName[:50],
+        'ua': build,
+        'dr':
+        (globalvar.ADDON.getAddonInfo('name') + '-' + globalvar.ADDON.getAddonInfo('version'))
+    }
     print 'Log', 'c=%s&p=%s' % (channel, param)
     try:
-      data = urllib.urlencode(values)
-      req = urllib2.Request(url, data)
-      response = urllib2.urlopen(req)
+        data = urllib.urlencode(values)
+        req = urllib2.Request(url, data)
+        response = urllib2.urlopen(req)
     except Exception:
-      print 'Error during Google Analytics'
+        print 'Error during Google Analytics'

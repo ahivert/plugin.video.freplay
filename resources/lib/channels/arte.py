@@ -11,8 +11,7 @@ title = ['ARTE']
 img = ['arte']
 readyForUse = True
 url_xml = 'http://www.arte.tv/papi/tvguide-flow/sitemap/feeds/videos/F.xml'
-url_player = ('http://arte.tv/papi/tvguide/videos/stream/'
-              'player/F/%s/ALL/ALL.json')
+url_player = ('http://arte.tv/papi/tvguide/videos/stream/' 'player/F/%s/ALL/ALL.json')
 dic = {
     "musique": "Musique",
     "serie-fiction": "Série fiction",
@@ -49,13 +48,8 @@ def list_shows(channel, folder):
             if len(categoryTab) > 0:
                 category = typo_correction(fix_text(categoryTab[0]))
                 if category not in d:
-                        shows.append([
-                            channel,
-                            category,
-                            category,
-                            '',
-                            'folder'])
-                        d[category] = category
+                    shows.append([channel, category, category, '', 'folder'])
+                    d[category] = category
     else:
         for i in range(0, len(url)):
             categoryTab = common.parseDOM(url[i], "video:category")
@@ -67,15 +61,11 @@ def list_shows(channel, folder):
                     videoTag = common.parseDOM(url[i], "video:tag")[0]
                 else:
                     videoTag = 'ARTE+7'
-                if(typo_correction(fix_text(categoryTab[0])) == folder and
-                        title not in d and
-                        videoTag == 'ARTE+7'):
-                    shows.append([
-                        channel,
-                        title,
-                        title,
-                        '',
-                        'shows'])
+                if (
+                    typo_correction(fix_text(categoryTab[0])) == folder and title not in d
+                    and videoTag == 'ARTE+7'
+                ):
+                    shows.append([channel, title, title, '', 'shows'])
                     d[title] = title
 
     return shows
@@ -124,16 +114,16 @@ def list_videos(channel, show_title):
 
             tmpTab = common.parseDOM(url[i], "video:player_loc")
             if len(tmpTab) > 0:
-                    if tmpTab[0] == "1":
-                        tmpTab = common.parseDOM(url[i], "video:id")
-                        if len(tmpTab) > 0:
-                            video_id = tmpTab[0][28:28 + 10] + "_PLUS7-F"
-                    else:
-                        start = tmpTab[0].find("%2Fplayer%2FF%2F")
-                        end = tmpTab[0].find("%2F", start + 16)
-                        video_id = tmpTab[0][start + 16:end]
-                        if video_id.find("EXTRAIT") > 0:
-                            name = "Extrait-" + name
+                if tmpTab[0] == "1":
+                    tmpTab = common.parseDOM(url[i], "video:id")
+                    if len(tmpTab) > 0:
+                        video_id = tmpTab[0][28:28 + 10] + "_PLUS7-F"
+                else:
+                    start = tmpTab[0].find("%2Fplayer%2FF%2F")
+                    end = tmpTab[0].find("%2F", start + 16)
+                    video_id = tmpTab[0][start + 16:end]
+                    if video_id.find("EXTRAIT") > 0:
+                        name = "Extrait-" + name
 
             videoTag = common.parseDOM(url[i], "video:tag")[0]
             picTab = common.parseDOM(url[i], "video:thumbnail_loc")
@@ -145,16 +135,10 @@ def list_videos(channel, show_title):
                 "Plot": desc,
                 "Aired": date,
                 "Duration": duration,
-                "Year": date[:4]}
-            if not(globalvar.ADDON.getSetting('arteFull') == 'true' and
-                    videoTag != 'ARTE+7'):
-                videos.append([
-                    channel,
-                    video_id,
-                    title,
-                    image_url,
-                    infoLabels,
-                    'play'])
+                "Year": date[:4]
+            }
+            if not (globalvar.ADDON.getSetting('arteFull') == 'true' and videoTag != 'ARTE+7'):
+                videos.append([channel, video_id, title, image_url, infoLabels, 'play'])
     return videos
 
 
@@ -174,8 +158,7 @@ def getVideoURL(channel, video_id):
         else:
             url = jsoncat['videoJsonPlayer']['VSR']['RTMP_SQ_1']['streamer']
             url = url + jsoncat['videoJsonPlayer']['VSR']['RTMP_SQ_1']['url']
-    if (globalvar.ADDON.getSetting('%sQuality' % (channel)) == 'SD' or
-            url == ' '):
+    if (globalvar.ADDON.getSetting('%sQuality' % (channel)) == 'SD' or url == ' '):
         # SD HTTP
         if 'HLS_SQ_1':
             url = jsoncat['videoJsonPlayer']['VSR']['HLS_SQ_1']['url']
