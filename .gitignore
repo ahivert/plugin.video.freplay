@@ -30,6 +30,8 @@ Temporary Items
 
 # Idea folder
 .idea
+# vscode folder
+.vscode
 
 # virtualenv
 venv

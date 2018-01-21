@@ -9,7 +9,6 @@ import urllib
 import urllib2
 import string
 import log
-import logging
 import requests
 import YDStreamExtractor
 import HTMLParser
@@ -40,47 +39,48 @@ class ChromeURLopener(urllib.FancyURLopener):
 urllib._urlopener = ChromeURLopener()
 
 
-def getOrderChannel(chanName):
-    if globalvar.ADDON.getSetting('disp' + chanName):
-        return int(globalvar.ADDON.getSetting('disp' + chanName))
+def get_channel_order(channel_name):
+    value = globalvar.ADDON.getSetting('disp' + channel_name)
+    if value:
+        return int(value)
     else:
-        print 'Missing Settings for :' + chanName
+        print 'Missing Settings for :' + channel_name
         return 20
 
 
 def init():
-    for subdir, dirs, files in os.walk(globalvar.CHANNELS_DIR):
-        for file in files:
-            filename, extension = os.path.splitext(file)
-            extension = extension.upper()
-            if extension == '.PY' and file != '__init__.py':
-                f, filepath, description = imp.find_module(filename, [globalvar.CHANNELS_DIR])
-                try:
-                    channelModule = imp.load_module(filename, f, filepath, description)
-                except Exception:
-                    logging.exception("Error loading channel module " + filepath)
+    for full_filename in os.listdir(globalvar.CHANNELS_DIR):
+        filename, extension = os.path.splitext(full_filename)
+        if '__' in filename or extension.lower() != '.py':
+            continue
 
-                if channelModule.readyForUse:
-                    for i in range(0, len(channelModule.title)):
-                        order = getOrderChannel(channelModule.img[i])
-                        if order != 99:
-                            globalvar.channels[channelModule.img[i]] = [
-                                channelModule.title[i], channelModule, order
-                            ]
-                            globalvar.ordered_channels.append((channelModule.img[i], order))
-                        else:
-                            globalvar.hidden_channels.append(channelModule.title[i])
-                            globalvar.hidden_channelsName.append(channelModule.img[i])
-                else:
-                    print 'Enlever:' + filename
+        channel_module = imp.load_source(
+            filename,
+            os.path.join(globalvar.CHANNELS_DIR, full_filename)
+        )
+
+        if not channel_module.readyForUse:
+            print('%s is not ready for use' % filename)
+            continue
+
+        for title, img in zip(channel_module.title, channel_module.img):
+            order = get_channel_order(img)
+            if order != 99:
+                globalvar.channels[img] = [
+                    title, channel_module, order
+                ]
+                globalvar.ordered_channels.append((img, order))
+            else:
+                globalvar.hidden_channels.append(title)
+                globalvar.hidden_channelsName.append(img)
 
     globalvar.ordered_channels.sort(key=lambda channel: channel[0])
     globalvar.ordered_channels.sort(key=lambda channel: channel[1])
 
-    for i in range(len(globalvar.ordered_channels)):
-        if globalvar.ordered_channels[i][1] != i:
-            globalvar.ordered_channels[i] = (globalvar.ordered_channels[i][0], i)
-            globalvar.ADDON.setSetting('disp' + globalvar.ordered_channels[i][0], str(i))
+    # for channel, order in globalvar.ordered_channels:
+    #     if globalvar.ordered_channels[i][1] != i:
+    #         globalvar.ordered_channels[i] = (globalvar.ordered_channels[i][0], i)
+    #         globalvar.ADDON.setSetting('disp' + globalvar.ordered_channels[i][0], str(i))
     globalvar.dlfolder = globalvar.ADDON.getSetting('dlFolder')
 
 
@@ -218,10 +218,11 @@ def formatName(text):
 def getExtURL(urlPage):
     print 'YoutubeDL decoding ' + urlPage
 
+    # quality is 0=SD, 1=720p, 2=1080p and is a maximum
     vid = YDStreamExtractor.getVideoInfo(
         urlPage, quality=2
-    )    #quality is 0=SD, 1=720p, 2=1080p and is a maximum
-    stream_url = vid.streamURL()    #This is what Kodi (XBMC) will play
+    )
+    stream_url = vid.streamURL()  # This is what Kodi (XBMC) will play
 
     return stream_url
 
